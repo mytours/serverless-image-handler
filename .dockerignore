@@ -2,7 +2,6 @@
 **/dist
 **/global-s3-assets
 **/regional-s3-assets
-**/staging
 **/open-source
 **/.zip
 **/tmp
@@ -10,13 +9,11 @@
 
 # dependencies
 **/node_modules
-**/modules
 
 # test assets
 **/coverage
 **/coverage-reports
 **/.nyc_output
-**/mock-*
 
 # misc
 **/npm-debug.log
@@ -27,7 +24,3 @@ demo-ui-config.js
 # System Files
 **/.DS_Store
 **/.vscode
-**/.idea
-
-/imagehandler-*.zip
-source/constructs/template.json
