@@ -23,6 +23,7 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import utc from "dayjs/plugin/utc";
 import { QueryParamMapper } from "./query-param-mapper";
+import { IIIFMapper, IIIFMatch } from "./iiif-mapper";
 dayjs.extend(customParseFormat);
 dayjs.extend(utc);
 
@@ -255,6 +256,12 @@ export class ImageRequest {
         return potentialBucket[0];
       }
       return sourceBuckets[0];
+    } else if (requestType === RequestTypes.IIIF) {
+      const { rawPath } = event;
+      const match = IIIFMatch.exec(rawPath);
+      const identifier = decodeURIComponent(match.groups.identifier);
+      const [bucket] = identifier.split("/", 1);
+      return bucket;
     } else {
       throw new ImageHandlerError(
         StatusCodes.NOT_FOUND,
@@ -277,6 +284,9 @@ export class ImageRequest {
     } else if (requestType === RequestTypes.THUMBOR) {
       const thumborMapping = new ThumborMapper();
       return thumborMapping.mapPathToEdits(event.rawPath);
+    } else if (requestType === RequestTypes.IIIF) {
+      const iiifMapping = new IIIFMapper();
+      return iiifMapping.mapPathToEdits(event.rawPath);
     } else if (requestType === RequestTypes.CUSTOM) {
       const thumborMapping = new ThumborMapper();
       const parsedPath = thumborMapping.parseCustomPath(event.rawPath);
@@ -319,6 +329,15 @@ export class ImageRequest {
     if (requestType === RequestTypes.DEFAULT) {
       // Decode the image request and return the image key
       const { key } = this.decodeRequest(event);
+      return key;
+    }
+
+    if (requestType === RequestTypes.IIIF) {
+      const { rawPath } = event;
+      const match = IIIFMatch.exec(rawPath);
+      const identifier = decodeURIComponent(match.groups.identifier);
+      const parts = identifier.split("/");
+      const key = parts.slice(1).join("/");
       return key;
     }
 
@@ -395,6 +414,9 @@ export class ImageRequest {
     } else if (definedEnvironmentVariables) {
       // use rewrite function then thumbor mappings
       return RequestTypes.CUSTOM;
+    } else if (IIIFMatch.test(rawPath)) {
+      // use rewrite function then IIIF mappings
+      return RequestTypes.IIIF;
     } else if (matchThumbor1.test(rawPath) && (matchThumbor2.test(rawPath) || matchThumbor3.test(rawPath))) {
       // use thumbor mappings
       return RequestTypes.THUMBOR;
