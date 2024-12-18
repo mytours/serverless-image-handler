@@ -9,6 +9,7 @@ import SecretsManager from "aws-sdk/clients/secretsmanager";
 import { ImageRequest } from "../../image-request";
 import { ImageHandlerError, StatusCodes } from "../../lib";
 import { SecretProvider } from "../../secret-provider";
+import { RequestTypes } from "../../lib/enums";
 
 describe("getOriginalImage", () => {
   const s3Client = new S3();
@@ -148,6 +149,25 @@ describe("getOriginalImage", () => {
       });
       expect(result.originalImage).toEqual(Buffer.from(new Uint8Array(hex)));
       expect(result.contentType).toEqual(expected);
+    });
+  });
+
+  describe("IIIF requests", () => {
+    it("Should pass if a bucket is specified", () => {
+      // Arrange
+      const event = {
+        ...defaultEvent,
+        rawPath:
+          "/iiif/2/test-storage%2F42042%2Fe%2F0%2Fbd97fb-490b-43ca-8087-0dcde6aa3a16%2Foriginal.tiff/full/!880,1024/0/default.jpg",
+      };
+
+      // Act
+      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const result = imageRequest.parseImageBucket(event, RequestTypes.IIIF);
+
+      // Assert
+      const expectedResult = "test-storage";
+      expect(result).toEqual(expectedResult);
     });
   });
 });

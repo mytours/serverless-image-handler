@@ -99,4 +99,29 @@ describe("parseImageEdits", () => {
       });
     }
   });
+
+  describe("IIIF requests", () => {
+    it("Should pass if the proper result is returned for a sample IIIF-type image request", () => {
+      // Arrange
+      const event = {
+        ...defaultEvent,
+        rawPath:
+          "/iiif/2/test-storage%2F42042%2Fe%2F0%2Fbd97fb-490b-43ca-8087-0dcde6aa3a16%2Foriginal.tiff/full/!880,1024/0/default.jpg",
+      };
+
+      // Act
+      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const result = imageRequest.parseImageEdits(event, RequestTypes.IIIF);
+
+      // Assert
+      const expectedResult = {
+        toFormat: "jpeg",
+        resize: {
+          width: 880,
+          height: 1024,
+        },
+      };
+      expect(result).toEqual(expectedResult);
+    });
+  });
 });

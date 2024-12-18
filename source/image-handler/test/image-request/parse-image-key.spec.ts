@@ -345,4 +345,23 @@ describe("parseImageKey", () => {
     const expectedResult = "image.jpg";
     expect(result).toEqual(expectedResult);
   });
+
+  describe("IIIF requests", () => {
+    it("Should pass if an image key value is provided in the iiif request format", () => {
+      // Arrange
+      const event = {
+        ...defaultEvent,
+        rawPath:
+          "/iiif/2/test-storage%2F42042%2Fe%2F0%2Fbd97fb-490b-43ca-8087-0dcde6aa3a16%2Foriginal.tiff/full/!880,1024/0/default.jpg",
+      };
+
+      // Act
+      const imageRequest = new ImageRequest(s3Client, secretProvider);
+      const result = imageRequest.parseImageKey(event, RequestTypes.IIIF);
+
+      // Assert
+      const expectedResult = "42042/e/0/bd97fb-490b-43ca-8087-0dcde6aa3a16/original.tiff";
+      expect(result).toEqual(expectedResult);
+    });
+  });
 });
