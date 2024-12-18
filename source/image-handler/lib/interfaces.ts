@@ -5,17 +5,9 @@ import sharp from "sharp";
 
 import { ImageFormatTypes, RequestTypes, StatusCodes } from "./enums";
 import { Headers, ImageEdits } from "./types";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
-export interface ImageHandlerEvent {
-  path?: string;
-  queryStringParameters?: {
-    signature: string;
-  };
-  requestContext?: {
-    elb?: unknown;
-  };
-  headers?: Headers;
-}
+export interface ImageHandlerEvent extends APIGatewayProxyEventV2 {}
 
 export interface DefaultImageRequest {
   bucket?: string;

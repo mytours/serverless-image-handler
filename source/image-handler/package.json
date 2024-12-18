@@ -22,6 +22,7 @@
     "sharp": "^0.32.6"
   },
   "devDependencies": {
+    "@types/aws-lambda": "8.10.137",
     "@types/color": "^3.0.5",
     "@types/color-name": "^1.1.2",
     "@types/jest": "^29.5.6",

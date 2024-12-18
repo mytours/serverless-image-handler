@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+import { defaultEvent } from "../mock";
+
 import S3 from "aws-sdk/clients/s3";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
 
@@ -21,7 +23,10 @@ const request: Record<string, any> = {
 };
 
 const createEvent = (request): ImageHandlerEvent => {
-  return { path: `${Buffer.from(JSON.stringify(request)).toString("base64")}` };
+  return {
+    ...defaultEvent,
+    rawPath: `${Buffer.from(JSON.stringify(request)).toString("base64")}`,
+  };
 };
 
 describe("determineOutputFormat", () => {

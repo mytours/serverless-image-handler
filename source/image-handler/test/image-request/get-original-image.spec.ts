@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import { mockAwsS3 } from "../mock";
+import { mockAwsS3, defaultEvent } from "../mock";
 
 import S3 from "aws-sdk/clients/s3";
 import SecretsManager from "aws-sdk/clients/secretsmanager";

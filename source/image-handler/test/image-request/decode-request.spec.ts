@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+import { defaultEvent } from "../mock";
+
 import S3 from "aws-sdk/clients/s3";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
 
@@ -16,7 +18,8 @@ describe("decodeRequest", () => {
   it("Should pass if a valid base64-encoded path has been specified", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJidWNrZXQtbmFtZS1oZXJlIiwia2V5Ijoia2V5LW5hbWUtaGVyZSJ9",
+      ...defaultEvent,
+      rawPath: "/eyJidWNrZXQiOiJidWNrZXQtbmFtZS1oZXJlIiwia2V5Ijoia2V5LW5hbWUtaGVyZSJ9",
     };
 
     // Act
@@ -33,7 +36,10 @@ describe("decodeRequest", () => {
 
   it("Should throw an error if a valid base64-encoded path has not been specified", () => {
     // Arrange
-    const event = { path: "/someNonBase64EncodedContentHere" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/someNonBase64EncodedContentHere",
+    };
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -53,7 +59,9 @@ describe("decodeRequest", () => {
 
   it("Should throw an error if no path is specified at all", () => {
     // Arrange
-    const event = {};
+    const event = {
+      ...defaultEvent,
+    };
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);

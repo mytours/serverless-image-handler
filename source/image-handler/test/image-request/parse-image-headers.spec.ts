@@ -1,6 +1,8 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+import { defaultEvent } from "../mock";
+
 import S3 from "aws-sdk/clients/s3";
 import SecretsManager from "aws-sdk/clients/secretsmanager";
 
@@ -16,7 +18,9 @@ describe("parseImageHeaders", () => {
   it("001/Should return headers if headers are provided for a sample base64-encoded image request", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiaGVhZGVycyI6eyJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0zMTUzNjAwMCxwdWJsaWMifSwib3V0cHV0Rm9ybWF0IjoianBlZyJ9",
+      ...defaultEvent,
+      rawPath:
+        "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiaGVhZGVycyI6eyJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0zMTUzNjAwMCxwdWJsaWMifSwib3V0cHV0Rm9ybWF0IjoianBlZyJ9",
     };
 
     // Act
@@ -33,7 +37,8 @@ describe("parseImageHeaders", () => {
   it("001/Should return undefined if headers are not provided for a base64-encoded image request", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5In0=",
+      ...defaultEvent,
+      rawPath: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5In0=",
     };
 
     // Act
@@ -46,7 +51,10 @@ describe("parseImageHeaders", () => {
 
   it("001/Should return undefined for Thumbor or Custom requests", () => {
     // Arrange
-    const event = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);

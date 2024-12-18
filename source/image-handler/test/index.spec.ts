@@ -3,10 +3,10 @@
 
 import fs from "fs";
 
-import { mockAwsS3 } from "./mock";
+import { mockAwsS3, defaultEvent } from "./mock";
 
 import { handler } from "../index";
-import { ImageHandlerError, ImageHandlerEvent, StatusCodes } from "../lib";
+import { ImageHandlerError, StatusCodes } from "../lib";
 
 describe("index", () => {
   // Arrange
@@ -22,7 +22,10 @@ describe("index", () => {
       },
     }));
     // Arrange
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Act
     const result = await handler(event);
@@ -57,8 +60,10 @@ describe("index", () => {
       },
     }));
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "/eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJoZWFkZXJzIjp7IkN1c3RvbS1IZWFkZXIiOiJDdXN0b21WYWx1ZSJ9fQ==",
+    const event = {
+      ...defaultEvent,
+      rawPath:
+        "/eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJoZWFkZXJzIjp7IkN1c3RvbS1IZWFkZXIiOiJDdXN0b21WYWx1ZSJ9fQ==",
     };
 
     // Act
@@ -95,11 +100,9 @@ describe("index", () => {
       },
     }));
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "/test.jpg",
-      requestContext: {
-        elb: {},
-      },
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
     };
 
     // Act
@@ -108,6 +111,7 @@ describe("index", () => {
       statusCode: StatusCodes.OK,
       isBase64Encoded: true,
       headers: {
+        "Access-Control-Allow-Credentials": true,
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Content-Type": "image/jpeg",
@@ -128,7 +132,10 @@ describe("index", () => {
 
   it("should return an error JSON when an error occurs", async () => {
     // Arrange
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
     // Mock
     mockAwsS3.getObject.mockImplementationOnce(() => ({
       promise() {
@@ -164,8 +171,9 @@ describe("index", () => {
 
   it("should return 500 error when there is no error status in the error", async () => {
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJlZGl0cyI6eyJ3cm9uZ0ZpbHRlciI6dHJ1ZX19",
+    const event = {
+      ...defaultEvent,
+      rawPath: "eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJlZGl0cyI6eyJ3cm9uZ0ZpbHRlciI6dHJ1ZX19",
     };
 
     // Mock
@@ -208,7 +216,10 @@ describe("index", () => {
     process.env.DEFAULT_FALLBACK_IMAGE_KEY = "fallback-image.png";
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Mock
     mockAwsS3.getObject.mockReset();
@@ -265,8 +276,9 @@ describe("index", () => {
     process.env.CORS_ORIGIN = "*";
 
     // {key: "test.jpg", headers: {Cache-Control: "max-age=11,public"}}
-    const event: ImageHandlerEvent = {
-      path: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
+    const event = {
+      ...defaultEvent,
+      rawPath: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
     };
 
     // Mock
@@ -324,8 +336,9 @@ describe("index", () => {
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
 
-    const event: ImageHandlerEvent = {
-      path: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
+    const event = {
+      ...defaultEvent,
+      rawPath: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
     };
 
     // Mock
@@ -376,8 +389,9 @@ describe("index", () => {
 
   it("should return an error JSON when getting the default fallback image fails if the default fallback image is enabled", async () => {
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "/test.jpg",
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
     };
 
     // Mock
@@ -422,7 +436,10 @@ describe("index", () => {
   it("should return an error JSON when the default fallback image key is not provided if the default fallback image is enabled", async () => {
     // Arrange
     process.env.DEFAULT_FALLBACK_IMAGE_KEY = "";
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Mock
     mockAwsS3.getObject.mockImplementationOnce(() => ({
@@ -461,7 +478,10 @@ describe("index", () => {
   it("should return an error JSON when the default fallback image bucket is not provided if the default fallback image is enabled", async () => {
     // Arrange
     process.env.DEFAULT_FALLBACK_IMAGE_BUCKET = "";
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Mock
     mockAwsS3.getObject.mockImplementationOnce(() => ({
@@ -499,11 +519,9 @@ describe("index", () => {
 
   it("Should return an error JSON when ALB request is failed", async () => {
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "/test.jpg",
-      requestContext: {
-        elb: {},
-      },
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
     };
 
     // Mock
@@ -519,6 +537,7 @@ describe("index", () => {
       statusCode: StatusCodes.NOT_FOUND,
       isBase64Encoded: false,
       headers: {
+        "Access-Control-Allow-Credentials": true,
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
         "Access-Control-Allow-Origin": "*",
@@ -542,8 +561,10 @@ describe("index", () => {
   it("should return an error JSON with the expected message when one or both overlay image dimensions are greater than the base image dimensions", async () => {
     // Arrange
     // {"bucket":"source-bucket","key":"transparent-10x10.png","edits":{"overlayWith":{"bucket":"source-bucket","key":"transparent-5x5.png"}},"headers":{"Custom-Header":"Custom header test","Cache-Control":"max-age:1,public"}}
-    const event: ImageHandlerEvent = {
-      path: "eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidHJhbnNwYXJlbnQtMTB4MTAucG5nIiwiZWRpdHMiOnsib3ZlcmxheVdpdGgiOnsiYnVja2V0Ijoic291cmNlLWJ1Y2tldCIsImtleSI6InRyYW5zcGFyZW50LTV4NS5wbmcifX0sImhlYWRlcnMiOnsiQ3VzdG9tLUhlYWRlciI6IkN1c3RvbSBoZWFkZXIgdGVzdCIsIkNhY2hlLUNvbnRyb2wiOiJtYXgtYWdlOjEscHVibGljIn19",
+    const event = {
+      ...defaultEvent,
+      rawPath:
+        "eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidHJhbnNwYXJlbnQtMTB4MTAucG5nIiwiZWRpdHMiOnsib3ZlcmxheVdpdGgiOnsiYnVja2V0Ijoic291cmNlLWJ1Y2tldCIsImtleSI6InRyYW5zcGFyZW50LTV4NS5wbmcifX0sImhlYWRlcnMiOnsiQ3VzdG9tLUhlYWRlciI6IkN1c3RvbSBoZWFkZXIgdGVzdCIsIkNhY2hlLUNvbnRyb2wiOiJtYXgtYWdlOjEscHVibGljIn19",
     };
     // Mock
     const overlayImage = fs.readFileSync("./test/image/transparent-5x5.jpeg");
