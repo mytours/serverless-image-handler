@@ -4,6 +4,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 
+import { defaultEvent } from "../mock";
 import { ImageRequest } from "../../image-request";
 import { RequestTypes, StatusCodes } from "../../lib";
 import { SecretProvider } from "../../secret-provider";
@@ -25,7 +26,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the default request format", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJteS1zYW1wbGUtYnVja2V0Iiwia2V5Ijoic2FtcGxlLWltYWdlLTAwMS5qcGcifQ==",
+      ...defaultEvent,
+      rawPath: "/eyJidWNrZXQiOiJteS1zYW1wbGUtYnVja2V0Iiwia2V5Ijoic2FtcGxlLWltYWdlLTAwMS5qcGcifQ==",
     };
 
     // Act
@@ -39,7 +41,9 @@ describe("parseImageKey", () => {
 
   it("should read image requests with base64 encoding having slash", () => {
     const event = {
-      path: "/eyJidWNrZXQiOiJlbGFzdGljYmVhbnN0YWxrLXVzLWVhc3QtMi0wNjY3ODQ4ODU1MTgiLCJrZXkiOiJlbnYtcHJvZC9nY2MvbGFuZGluZ3BhZ2UvMV81N19TbGltTl9MaWZ0LUNvcnNldC1Gb3ItTWVuLVNOQVAvYXR0YWNobWVudHMvZmZjMWYxNjAtYmQzOC00MWU4LThiYWQtZTNhMTljYzYxZGQzX1/Ys9mE2YrZhSDZhNmK2YHYqiAoMikuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo0ODAsImZpdCI6ImNvdmVyIn19fQ==",
+      ...defaultEvent,
+      rawPath:
+        "/eyJidWNrZXQiOiJlbGFzdGljYmVhbnN0YWxrLXVzLWVhc3QtMi0wNjY3ODQ4ODU1MTgiLCJrZXkiOiJlbnYtcHJvZC9nY2MvbGFuZGluZ3BhZ2UvMV81N19TbGltTl9MaWZ0LUNvcnNldC1Gb3ItTWVuLVNOQVAvYXR0YWNobWVudHMvZmZjMWYxNjAtYmQzOC00MWU4LThiYWQtZTNhMTljYzYxZGQzX1/Ys9mE2YrZhSDZhNmK2YHYqiAoMikuanBnIiwiZWRpdHMiOnsicmVzaXplIjp7IndpZHRoIjo0ODAsImZpdCI6ImNvdmVyIn19fQ==",
     };
 
     // Act
@@ -55,7 +59,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request format", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/thumbor-image.jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/thumbor-image.jpg",
     };
 
     // Act
@@ -70,7 +75,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request format having open, close parentheses", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/thumbor-image (1).jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/thumbor-image (1).jpg",
     };
 
     // Act
@@ -85,7 +91,8 @@ describe("parseImageKey", () => {
   it("Should not include s3:bucket tag if a thumbor request includes an s3:bucket tag that is equal to the overridden bucket", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/s3:some-test-bucket/filters:grayscale()/thumbor-image (1).jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/s3:some-test-bucket/filters:grayscale()/thumbor-image (1).jpg",
     };
 
     // Act
@@ -100,7 +107,8 @@ describe("parseImageKey", () => {
   it("Should include s3:bucket tag if a thumbor request includes an s3:bucket tag that is not equal to the overridden bucket", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/s3:some-test-bucket/thumbor-image (1).jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/s3:some-test-bucket/thumbor-image (1).jpg",
     };
 
     // Act
@@ -115,7 +123,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request format having open parentheses", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/thumbor-image (1.jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/thumbor-image (1.jpg",
     };
 
     // Act
@@ -130,7 +139,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request format having close parentheses", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/thumbor-image 1).jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/thumbor-image 1).jpg",
     };
 
     // Act
@@ -145,7 +155,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request format having close parentheses in the middle of the name", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
     };
 
     // Act
@@ -160,7 +171,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request and the path has crop filter", () => {
     // Arrange
     const event = {
-      path: "/10x10:100x100/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
+      ...defaultEvent,
+      rawPath: "/10x10:100x100/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
     };
 
     // Act
@@ -175,7 +187,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request and the path has resize filter", () => {
     // Arrange
     const event = {
-      path: "/10x10/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
+      ...defaultEvent,
+      rawPath: "/10x10/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
     };
 
     // Act
@@ -190,7 +203,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request and the path has crop and resize filters", () => {
     // Arrange
     const event = {
-      path: "/10x20:100x200/10x10/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
+      ...defaultEvent,
+      rawPath: "/10x20:100x200/10x10/filters:rotate(90)/filters:grayscale()/thumbor-image (1) suffix.jpg",
     };
 
     // Act
@@ -205,7 +219,8 @@ describe("parseImageKey", () => {
   it('Should pass if an image key value is provided in the thumbor request and the key string has substring "fit-in"', () => {
     // Arrange
     const event = {
-      path: "/fit-in/400x0/filters:fill(ffffff)/fit-in-thumbor-image (1) suffix.jpg",
+      ...defaultEvent,
+      rawPath: "/fit-in/400x0/filters:fill(ffffff)/fit-in-thumbor-image (1) suffix.jpg",
     };
 
     // Act
@@ -219,7 +234,10 @@ describe("parseImageKey", () => {
 
   it("Should pass if the image in the sub-directory", () => {
     // Arrange
-    const event = { path: "/100x100/test-100x100/test/beach-100x100.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/100x100/test-100x100/test/beach-100x100.jpg",
+    };
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -233,7 +251,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the custom request format", () => {
     // Arrange
     const event = {
-      path: "/filters-rotate(90)/filters-grayscale()/custom-image.jpg",
+      ...defaultEvent,
+      rawPath: "/filters-rotate(90)/filters-grayscale()/custom-image.jpg",
     };
 
     process.env = {
@@ -253,7 +272,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the custom request format", () => {
     // Arrange
     const event = {
-      path: "/filters-rotate(90)/filters-grayscale()/custom-image.jpg",
+      ...defaultEvent,
+      rawPath: "/filters-rotate(90)/filters-grayscale()/custom-image.jpg",
     };
 
     process.env = {
@@ -273,7 +293,8 @@ describe("parseImageKey", () => {
   it("Should throw an error if an unrecognized requestType is passed into the function as a parameter", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/other-image.jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/other-image.jpg",
     };
 
     // Act
@@ -295,7 +316,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request format with a watermark containing a slash", () => {
     // Arrange
     const event = {
-      path: "/fit-in/400x400/filters:watermark(bucket,folder/key.png,0,0)/image.jpg",
+      ...defaultEvent,
+      rawPath: "/fit-in/400x400/filters:watermark(bucket,folder/key.png,0,0)/image.jpg",
     };
 
     // Act
@@ -310,7 +332,8 @@ describe("parseImageKey", () => {
   it("Should pass if an image key value is provided in the thumbor request format with a watermark not containing a slash", () => {
     // Arrange
     const event = {
-      path: "/fit-in/400x400/filters:watermark(bucket,key.png,0,0)/image.jpg",
+      ...defaultEvent,
+      rawPath: "/fit-in/400x400/filters:watermark(bucket,key.png,0,0)/image.jpg",
     };
 
     // Act

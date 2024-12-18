@@ -4,6 +4,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 
+import { defaultEvent } from "../mock";
 import { ImageRequest } from "../../image-request";
 import { RequestTypes, StatusCodes } from "../../lib";
 import { SecretProvider } from "../../secret-provider";
@@ -25,7 +26,8 @@ describe("parseImageEdits", () => {
   it("Should pass if the proper result is returned for a sample base64-encoded image request", () => {
     // Arrange
     const event = {
-      path: "/eyJlZGl0cyI6eyJncmF5c2NhbGUiOiJ0cnVlIiwicm90YXRlIjo5MCwiZmxpcCI6InRydWUifX0=",
+      ...defaultEvent,
+      rawPath: "/eyJlZGl0cyI6eyJncmF5c2NhbGUiOiJ0cnVlIiwicm90YXRlIjo5MCwiZmxpcCI6InRydWUifX0=",
     };
 
     // Act
@@ -40,7 +42,8 @@ describe("parseImageEdits", () => {
   it("Should pass if the proper result is returned for a sample thumbor-type image request", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/thumbor-image.jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/thumbor-image.jpg",
     };
 
     // Act
@@ -55,7 +58,8 @@ describe("parseImageEdits", () => {
   it("Should pass if the proper result is returned for a sample custom-type image request", () => {
     // Arrange
     const event = {
-      path: "/filters-rotate(90)/filters-grayscale()/thumbor-image.jpg",
+      ...defaultEvent,
+      rawPath: "/filters-rotate(90)/filters-grayscale()/thumbor-image.jpg",
     };
 
     process.env = {
@@ -75,7 +79,8 @@ describe("parseImageEdits", () => {
   it("Should throw an error if a requestType is not specified and/or the image edits cannot be parsed", () => {
     // Arrange
     const event = {
-      path: "/filters:rotate(90)/filters:grayscale()/other-image.jpg",
+      ...defaultEvent,
+      rawPath: "/filters:rotate(90)/filters:grayscale()/other-image.jpg",
     };
 
     // Act

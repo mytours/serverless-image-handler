@@ -1,7 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
-import { consoleInfoSpy } from "../mock";
+import { consoleInfoSpy, defaultEvent } from "../mock";
 
 import { S3Client } from "@aws-sdk/client-s3";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
@@ -27,7 +27,8 @@ describe("parseRequestType", () => {
   it("Should pass if the method detects a default request", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJteS1zYW1wbGUtYnVja2V0Iiwia2V5IjoibXktc2FtcGxlLWtleSIsImVkaXRzIjp7ImdyYXlzY2FsZSI6dHJ1ZX19",
+      ...defaultEvent,
+      rawPath: "/eyJidWNrZXQiOiJteS1zYW1wbGUtYnVja2V0Iiwia2V5IjoibXktc2FtcGxlLWtleSIsImVkaXRzIjp7ImdyYXlzY2FsZSI6dHJ1ZX19",
     };
     process.env = {};
 
@@ -43,7 +44,8 @@ describe("parseRequestType", () => {
   it("Should pass if the method detects a thumbor request", () => {
     // Arrange
     const event = {
-      path: "/unsafe/filters:brightness(10):contrast(30)/https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Coffee_berries_1.jpg/1200px-Coffee_berries_1.jpg",
+      ...defaultEvent,
+      rawPath: "/unsafe/filters:brightness(10):contrast(30)/https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Coffee_berries_1.jpg/1200px-Coffee_berries_1.jpg",
     };
     process.env = {};
 
@@ -59,7 +61,8 @@ describe("parseRequestType", () => {
   it("Should pass for a thumbor request with no extension", () => {
     // Arrange
     const event = {
-      path: "/unsafe/filters:brightness(10):contrast(30)/image",
+      ...defaultEvent,
+      rawPath: "/unsafe/filters:brightness(10):contrast(30)/image",
     };
     process.env = {};
 
@@ -86,7 +89,7 @@ describe("parseRequestType", () => {
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);
-    const result = imageRequest.parseRequestType({ path: `image${value}` });
+    const result = imageRequest.parseRequestType({ ...defaultEvent, rawPath: `image${value}` });
 
     // Assert
     expect(result).toEqual(RequestTypes.THUMBOR);
@@ -94,7 +97,10 @@ describe("parseRequestType", () => {
 
   it("Should pass if the method detects a custom request", () => {
     // Arrange
-    const event = { path: "/additionalImageRequestParameters/image.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/additionalImageRequestParameters/image.jpg",
+    };
     process.env = {
       REWRITE_MATCH_PATTERN: "matchPattern",
       REWRITE_SUBSTITUTION: "substitutionString",
@@ -111,7 +117,10 @@ describe("parseRequestType", () => {
 
   it("Should throw an error if the method cannot determine the request type based on the three groups given", () => {
     // Arrange
-    const event = { path: "12x12e24d234r2ewxsad123d34r.bmp" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "12x12e24d234r2ewxsad123d34r.bmp",
+    };
 
     process.env = {};
 
@@ -136,7 +145,8 @@ describe("parseRequestType", () => {
   it("Should throw an error for a thumbor request with invalid extension", () => {
     // Arrange
     const event = {
-      path: "/testImage.abc",
+      ...defaultEvent,
+      rawPath: "/testImage.abc",
     };
     process.env = {};
 
@@ -159,7 +169,10 @@ describe("parseRequestType", () => {
 
   it("Should pass if a path is provided without an extension", () => {
     // Arrange
-    const event = { path: "/image" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/image",
+    };
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);

@@ -4,6 +4,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 
+import { defaultEvent } from "../mock";
 import { ImageRequest } from "../../image-request";
 import { SecretProvider } from "../../secret-provider";
 
@@ -24,6 +25,7 @@ describe("getOutputFormat", () => {
   it('Should pass if it returns "webp" for a capitalized accepts header which includes webp', () => {
     // Arrange
     const event = {
+      ...defaultEvent,
       headers: {
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
@@ -42,6 +44,7 @@ describe("getOutputFormat", () => {
   it('Should pass if it returns "webp" for a lowercase accepts header which includes webp', () => {
     // Arrange
     const event = {
+      ...defaultEvent,
       headers: {
         accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
@@ -60,6 +63,7 @@ describe("getOutputFormat", () => {
   it("Should pass if it returns null for an accepts header which does not include webp", () => {
     // Arrange
     const event = {
+      ...defaultEvent,
       headers: {
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
@@ -78,6 +82,7 @@ describe("getOutputFormat", () => {
   it("Should pass if it returns null when AUTO_WEBP is disabled with accepts header including webp", () => {
     // Arrange
     const event = {
+      ...defaultEvent,
       headers: {
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",
@@ -96,6 +101,7 @@ describe("getOutputFormat", () => {
   it("Should pass if it returns null when AUTO_WEBP is not set with accepts header including webp", () => {
     // Arrange
     const event = {
+      ...defaultEvent,
       headers: {
         Accept:
           "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3",

@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import fs from "fs";
-import { mockS3Commands, mockContext } from "./mock";
+import { mockS3Commands, mockContext, defaultEvent } from "./mock";
 
 import { handler } from "../index";
-import { ImageHandlerError, ImageHandlerEvent, S3GetObjectEvent, StatusCodes } from "../lib";
+import { ImageHandlerError, S3GetObjectEvent, StatusCodes } from "../lib";
 // eslint-disable-next-line import/no-unresolved
 import { Context } from "aws-lambda";
 
@@ -51,7 +51,10 @@ describe("index", () => {
     mockS3Commands.getObject.mockResolvedValue({ Body: mockImageBody, ContentType: "image/jpeg" });
 
     // Arrange
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Act
     const result = await handler(event);
@@ -61,7 +64,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Content-Type": "image/jpeg",
         Expires: undefined,
         "Cache-Control": "max-age=31536000,public",
@@ -173,8 +175,10 @@ describe("index", () => {
     mockS3Commands.getObject.mockResolvedValue({ Body: mockImageBody, ContentType: "image/jpeg" });
 
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "/eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJoZWFkZXJzIjp7IkN1c3RvbS1IZWFkZXIiOiJDdXN0b21WYWx1ZSJ9fQ==",
+    const event = {
+      ...defaultEvent,
+      rawPath:
+        "/eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJoZWFkZXJzIjp7IkN1c3RvbS1IZWFkZXIiOiJDdXN0b21WYWx1ZSJ9fQ==",
     };
 
     // Act
@@ -184,7 +188,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Content-Type": "image/jpeg",
         Expires: undefined,
         "Cache-Control": "max-age=31536000,public",
@@ -208,11 +211,9 @@ describe("index", () => {
     mockS3Commands.getObject.mockResolvedValueOnce({ Body: mockImageBody, ContentType: "image/jpeg" });
 
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "/test.jpg",
-      requestContext: {
-        elb: {},
-      },
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
     };
 
     // Act
@@ -241,7 +242,10 @@ describe("index", () => {
 
   it("should return an error JSON when an error occurs", async () => {
     // Arrange
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
     // Mock
     mockS3Commands.getObject.mockRejectedValueOnce(
       new ImageHandlerError(StatusCodes.NOT_FOUND, "NoSuchKey", "NoSuchKey error happened.")
@@ -255,7 +259,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -275,8 +278,9 @@ describe("index", () => {
 
   it("should return 400 error when sharp is passed invalid image format", async () => {
     // Arrange
-    const event: ImageHandlerEvent = {
-      path: "eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJlZGl0cyI6eyJ3cm9uZ0ZpbHRlciI6dHJ1ZX19",
+    const event = {
+      ...defaultEvent,
+      rawPath: "eyJidWNrZXQiOiJzb3VyY2UtYnVja2V0Iiwia2V5IjoidGVzdC5qcGciLCJlZGl0cyI6eyJ3cm9uZ0ZpbHRlciI6dHJ1ZX19",
     };
 
     // Mock
@@ -290,7 +294,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -315,7 +318,10 @@ describe("index", () => {
     process.env.DEFAULT_FALLBACK_IMAGE_KEY = "fallback-image.png";
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Mock
     mockS3Commands.getObject
@@ -333,7 +339,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "image/png",
         "Cache-Control": "max-age=31536000,public",
@@ -362,8 +367,9 @@ describe("index", () => {
     process.env.CORS_ORIGIN = "*";
 
     // {key: "test.jpg", headers: {Cache-Control: "max-age=11,public"}}
-    const event: ImageHandlerEvent = {
-      path: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
+    const event = {
+      ...defaultEvent,
+      rawPath: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
     };
 
     // Mock
@@ -383,7 +389,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "image/png",
         "Cache-Control": "max-age=12,public",
@@ -412,8 +417,9 @@ describe("index", () => {
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
 
-    const event: ImageHandlerEvent = {
-      path: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
+    const event = {
+      ...defaultEvent,
+      rawPath: "ewoia2V5IjogInRlc3QuanBnIiwKImhlYWRlcnMiOiB7CiJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0xMSxwdWJsaWMiCn0KfQ==",
     };
 
     // Mock
@@ -432,7 +438,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "image/png",
         "Cache-Control": "max-age=11,public",
@@ -461,8 +466,9 @@ describe("index", () => {
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
 
-    const event: ImageHandlerEvent = {
-      path: "/test.jpg",
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
     };
 
     // Mock
@@ -478,7 +484,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json",
       },
@@ -506,7 +511,10 @@ describe("index", () => {
     process.env.DEFAULT_FALLBACK_IMAGE_KEY = "";
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Mock
     mockS3Commands.getObject.mockRejectedValueOnce(
@@ -521,7 +529,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json",
       },
@@ -545,7 +552,10 @@ describe("index", () => {
     process.env.DEFAULT_FALLBACK_IMAGE_BUCKET = "";
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
-    const event: ImageHandlerEvent = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Mock
     mockS3Commands.getObject.mockRejectedValueOnce(
@@ -560,7 +570,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json",
       },
@@ -583,11 +592,9 @@ describe("index", () => {
     // Arrange
     process.env.CORS_ENABLED = "Yes";
     process.env.CORS_ORIGIN = "*";
-    const event: ImageHandlerEvent = {
-      path: "/test.jpg",
-      requestContext: {
-        elb: {},
-      },
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
     };
 
     // Mock
@@ -631,8 +638,9 @@ describe("index", () => {
       headers: { "Custom-Header": "Custom header test", "Cache-Control": "max-age:1,public" },
     };
     const encStr = Buffer.from(JSON.stringify(imageRequest)).toString("base64");
-    const event: ImageHandlerEvent = {
-      path: `${encStr}`,
+    const event = {
+      ...defaultEvent,
+      rawPath: `${encStr}`,
     };
     const overlayImage = fs.readFileSync("./test/image/transparent-10x10.jpeg");
     const baseImage = fs.readFileSync("./test/image/transparent-5x5.jpeg");
@@ -655,7 +663,6 @@ describe("index", () => {
       headers: {
         "Access-Control-Allow-Methods": "GET",
         "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        "Access-Control-Allow-Credentials": "true",
         "Access-Control-Allow-Origin": "*",
         "Content-Type": "application/json",
       },

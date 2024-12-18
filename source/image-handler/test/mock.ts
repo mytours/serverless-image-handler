@@ -102,3 +102,31 @@ export const consoleInfoSpy = jest.spyOn(console, "info");
 export const mockContext = {
   getRemainingTimeInMillis: jest.fn(),
 };
+
+export const defaultEvent = {
+  version: "2.0",
+  routeKey: "$default",
+  rawQueryString: "",
+  rawPath: "",
+  headers: {},
+  isBase64Encoded: false,
+  requestContext: {
+    accountId: "",
+    apiId: "",
+    domainName: "",
+    domainPrefix: "",
+    http: {
+      method: "",
+      path: "",
+      protocol: "",
+      sourceIp: "",
+      userAgent: "",
+    },
+    requestId: "",
+    routeKey: "",
+    stage: "",
+    time: "",
+    timeEpoch: 0,
+    elb: undefined,
+  },
+};

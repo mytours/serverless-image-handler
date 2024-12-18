@@ -8,6 +8,7 @@ import { Headers, ImageEdits } from "./types";
 
 export interface QueryStringParameters {
   signature?: string;
+  sig?: string;
   expires?: string;
   format?: string;
   fit?: string;
@@ -21,6 +22,7 @@ export interface QueryStringParameters {
 
 export interface ImageHandlerEvent {
   path?: string;
+  rawPath?: string;
   queryStringParameters?: QueryStringParameters;
   requestContext?: {
     elb?: unknown;

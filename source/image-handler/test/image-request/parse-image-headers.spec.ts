@@ -4,6 +4,7 @@
 import { S3Client } from "@aws-sdk/client-s3";
 import { SecretsManagerClient } from "@aws-sdk/client-secrets-manager";
 
+import { defaultEvent } from "../mock";
 import { ImageRequest } from "../../image-request";
 import { RequestTypes } from "../../lib";
 import { SecretProvider } from "../../secret-provider";
@@ -16,7 +17,9 @@ describe("parseImageHeaders", () => {
   it("001/Should return headers if headers are provided for a sample base64-encoded image request", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiaGVhZGVycyI6eyJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0zMTUzNjAwMCxwdWJsaWMifSwib3V0cHV0Rm9ybWF0IjoianBlZyJ9",
+      ...defaultEvent,
+      rawPath:
+        "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiaGVhZGVycyI6eyJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0zMTUzNjAwMCxwdWJsaWMifSwib3V0cHV0Rm9ybWF0IjoianBlZyJ9",
     };
 
     // Act
@@ -40,7 +43,8 @@ describe("parseImageHeaders", () => {
      *  'Access-Control-Allow-Origin'
      **/
     const event = {
-      path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiaGVhZGVycyI6eyJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0zMTUzNjAwMCxwdWJsaWMiLCAiVHJhbnNmZXItZW5jb2RpbmciOiAidmFsdWUiLCAieC1hcGkta2V5IjogInZhbHVlIiwgIngtYW16LWhlYWRlciI6ICJ2YWx1ZSIsICJjb250ZW50LXR5cGUiOiAiaHRtbCIsICJBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW4iOiAiKiJ9LCJvdXRwdXRGb3JtYXQiOiJqcGVnIn0=",
+      ...defaultEvent,
+      rawPath: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5IiwiaGVhZGVycyI6eyJDYWNoZS1Db250cm9sIjoibWF4LWFnZT0zMTUzNjAwMCxwdWJsaWMiLCAiVHJhbnNmZXItZW5jb2RpbmciOiAidmFsdWUiLCAieC1hcGkta2V5IjogInZhbHVlIiwgIngtYW16LWhlYWRlciI6ICJ2YWx1ZSIsICJjb250ZW50LXR5cGUiOiAiaHRtbCIsICJBY2Nlc3MtQ29udHJvbC1BbGxvdy1PcmlnaW4iOiAiKiJ9LCJvdXRwdXRGb3JtYXQiOiJqcGVnIn0=",
     };
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);
@@ -56,7 +60,8 @@ describe("parseImageHeaders", () => {
   it("001/Should return undefined if headers are not provided for a base64-encoded image request", () => {
     // Arrange
     const event = {
-      path: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5In0=",
+      ...defaultEvent,
+      rawPath: "/eyJidWNrZXQiOiJ2YWxpZEJ1Y2tldCIsImtleSI6InZhbGlkS2V5In0=",
     };
 
     // Act
@@ -69,7 +74,10 @@ describe("parseImageHeaders", () => {
 
   it("001/Should return undefined for Thumbor or Custom requests", () => {
     // Arrange
-    const event = { path: "/test.jpg" };
+    const event = {
+      ...defaultEvent,
+      rawPath: "/test.jpg",
+    };
 
     // Act
     const imageRequest = new ImageRequest(s3Client, secretProvider);
