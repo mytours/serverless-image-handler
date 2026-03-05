@@ -570,10 +570,10 @@ export class ImageRequest {
         }
 
         const queryString = this.recreateQueryString(queryStringParameters);
-        const stringToSign = queryString !== "" ? [rawPath, queryString].join("?") : rawPath;
         
         if (queryStringParameters?.signature) {
           const signature = queryStringParameters.signature;
+          const stringToSign = queryString !== "" ? [rawPath, queryString].join("?") : rawPath;
           const hash = createHmac("sha256", key).update(stringToSign).digest("hex");
 
           // Signature should be made with the full path.
@@ -582,7 +582,7 @@ export class ImageRequest {
           }
         } else if (queryStringParameters?.sig) {
           const signature = queryStringParameters.sig;
-          const hash = createHmac("sha1", key).update(stringToSign).digest("hex");
+          const hash = createHmac("sha1", key).update(rawPath).digest("hex");
 
           // Signature should be made with the full path.
           if (signature !== hash) {
