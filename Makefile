@@ -21,10 +21,10 @@ imagehandler: source/**/*
 .PHONY: imagehandler
 
 source/constructs/template.json:
-	cd source/constructs && npm run clean:install && overrideWarningsEnabled=false npx cdk synth --json > template.json
+	cd source/constructs && npm run clean:install && overrideWarningsEnabled=false npx cdk synth v7-Stack --json > template.json
 
 dist: source/constructs/template.json
-	cp -R source/constructs/cdk.out/$(shell jq -r '.Resources[] | select(.Metadata."aws:cdk:path" == "ServerlessImageHandlerStack/BackEnd/ImageHandlerLambdaFunction/Resource") .Metadata."aws:asset:path"' source/constructs/template.json)/ dist
+	cp -R source/constructs/cdk.out/$(shell jq -r '.Resources[] | select(.Metadata."aws:cdk:path" == "v7-Stack/BackEnd/ImageHandlerLambdaFunction/Resource") .Metadata."aws:asset:path"' source/constructs/template.json)/ dist
 
 imagehandler-%.zip: dist
 	cd dist && zip -r ../$@ . && cd ..
