@@ -11,9 +11,9 @@ Run this on a Linux amd64 machine or VM. Arm Macs won't work.
    Set the variables in each build container / VM you use:
 
    ```bash
-   export LIBVIPS_VERSION=8.14.5
-   export SHARP_VERSION=0.32.6
-   export SERVERLESS_IMAGE_HANDLER_VERSION=6.3.2
+   export LIBVIPS_VERSION=8.16.1
+   export SHARP_VERSION=0.34.2
+   export SERVERLESS_IMAGE_HANDLER_VERSION=8.0.3
    export IMAGEHANDLER_VERSION=0.10.0
    ```
 
@@ -24,14 +24,15 @@ Run this on a Linux amd64 machine or VM. Arm Macs won't work.
    Ensure the target version builds without our changes:
 
    ```bash
-   cd sharp-lipvips
+   cd sharp-libvips
    git remote add upstream https://github.com/lovell/sharp-libvips.git
    git fetch upstream
    git checkout v${LIBVIPS_VERSION}
+   export DOCKER_DEFAULT_PLATFORM=linux/amd64
    VERSION_LATEST_REQUIRED=false ./build.sh ${LIBVIPS_VERSION} linux-x64
    ```
 
-   It will take 5-10 minutes to build. (I needed to remove a patch in `build/lin.sh` to get it to build.)
+   It will take 5-10 minutes to build. (I needed to fix the `cargo-c` version to `0.10.19` in `platforms/linux-x64/Dockerfile` to get it to build.)
 
    Then apply our changes:
 
@@ -55,7 +56,7 @@ Run this on a Linux amd64 machine or VM. Arm Macs won't work.
    Find the version of `glibc` used in the Lambda runtime (e.g. `2.34`)
 
    ```bash
-   docker run --entrypoint /bin/sh public.ecr.aws/lambda/nodejs:20 ldd --version
+   docker run --entrypoint /bin/sh public.ecr.aws/lambda/nodejs:22 ldd --version
    ```
 
    This needs to be a Linux x64 system with the version of glibc that is equal or **lower** than the Lambda runtime.
@@ -85,23 +86,23 @@ Run this on a Linux amd64 machine or VM. Arm Macs won't work.
    tar -C vendor/${LIBVIPS_VERSION}/linux-x64 -zxvf ../sharp-libvips/libvips-${LIBVIPS_VERSION}-linux-x64.tar.gz
    npm install
    rm -f prebuilds/* # if you've run this before
-   npx prebuild --runtime napi
+   cd src && ln -s ../package.json && npx prebuild --runtime napi --target 9
    ```
 
    Upload the library (needs AWS credentials):
 
    ```bash
-   aws s3 cp prebuilds/sharp-v${SHARP_VERSION}-napi-v7-linux-x64.tar.gz s3://stqry-libvips/v${SHARP_VERSION}/
+   aws s3 cp prebuilds/sharp-v${SHARP_VERSION}-napi-v9-linux-x64.tar.gz s3://stqry-libvips/v${SHARP_VERSION}/
    ```
   
-1. Build `serverless-image-handler`
+1. Build `mytours-serverless-image-handler`
 
    ```bash
    git fetch origin
    git checkout iiif
    git rebase v${SERVERLESS_IMAGE_HANDLER_VERSION}
    # fix any merge conflicts
-   # bump the version in Makefile
+   # bump the IMAGEHANDLER_VERSION in Makefile
    make imagehandler-${IMAGEHANDLER_VERSION}.zip
    ```
 

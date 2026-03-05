@@ -1,10 +1,11 @@
 export AWS_REGION = ap-southeast-2
 
-DOCKER_PLATFORM := linux/amd64
-AWS_ACCOUNT_ID  := 679173355480
-ECR_REGISTRY    := $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+DOCKER_PLATFORM      := linux/amd64
+AWS_ACCOUNT_ID       := 679173355480
+ECR_REGISTRY         := $(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com
+IMAGEHANDLER_VERSION := 0.10.0
 
-all: clean imagehandler-0.10.0.zip
+all: clean imagehandler-$(IMAGEHANDLER_VERSION).zip
 .PHONY: all
 
 clean:
@@ -15,7 +16,7 @@ login:
 	aws --region $(AWS_REGION) ecr get-login-password | docker login --username AWS --password-stdin $(ECR_REGISTRY)
 .PHONY: login
 
-imagehandler: TAG=0.10.0
+imagehandler: TAG=$(IMAGEHANDLER_VERSION)
 imagehandler: source/**/*
 	docker buildx build --pull --load --progress plain --platform $(DOCKER_PLATFORM) --tag $(ECR_REGISTRY)/imagehandler:$(TAG) .
 .PHONY: imagehandler
